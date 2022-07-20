@@ -59,7 +59,7 @@ class EzMysqli {
 
     public function initializeInstructionsList() {
         $this->allowed_instructions = [];
-        $this->allow(['select'])
+        $this->allow(['select', 'insert', 'get'])
         ->prohibit(['where', 'and', 'or']);
     }
 
@@ -80,6 +80,13 @@ class EzMysqli {
         return $this;
     }
 
+    private function execute() {
+        if($this->connection->query($this->query)===true) {
+            return true;
+        } else {
+            $this->criticalFail("Inserting failed: " . $this->connection->error);
+        }
+    }
     /**
      *  closes current database connection - usually when you want it to happen before the end of a file's execution
      * @return void
@@ -99,7 +106,7 @@ class EzMysqli {
         if($this->isAllowed('select')) {
             $this->query = 'SELECT ' . (is_array($fields) ? implode(',',$fields) : $fields) . ' ';
             $this->query .= 'FROM ' . $table . ' ';
-            $this->allow(['where'])->prohibit(['select']);
+            $this->allow(['where','get'])->prohibit(['select','insert']);
             return $this;
         }
     }
@@ -144,6 +151,28 @@ class EzMysqli {
         }
     }
     
+    
+    /**
+     * fields_values must be an associative array in the form of key_to_insert => value_to_insert_to_key
+     *
+     * @param  string $table
+     * @param  array $fields_values
+     * @return object
+     */
+    public function insert(string $table, array $fields_values) {
+        if($this->isAllowed('insert')) {
+            $this->clearCurrentQuery();
+            $this->query = 'INSERT INTO ' . $table .
+            ' ('. 
+                implode(', ', array_keys($fields_values))
+            .') VALUES (' .
+                implode(', ', array_map(function($item) {return '\''. $item . '\'';}, $fields_values) )  .
+            ')';
+            return $this->execute();
+        }
+    }
+
+
     /**
      * Clears current query string
      * @return object
@@ -170,18 +199,20 @@ class EzMysqli {
      * @return array
      */
     public function get() {
-        $query_result = $this->connection->query($this->query);
-        $result = [];
-        if($query_result->num_rows > 0) {
-            while($row = $query_result->fetch_assoc()) {
-                array_push($result, $row);
+        if($this->isAllowed('get')) {
+            $query_result = $this->connection->query($this->query);
+            $result = [];
+            if($query_result->num_rows > 0) {
+                while($row = $query_result->fetch_assoc()) {
+                    array_push($result, $row);
+                }
             }
-        }
-        $this->clearCurrentQuery();
-        if(count($result)>0) {
-            return $result;
-        } else {
-            return ['results'=>0];
+            $this->clearCurrentQuery();
+            if(count($result)>0) {
+                return $result;
+            } else {
+                return ['results'=>0];
+            }
         }
     }
 }

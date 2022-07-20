@@ -27,3 +27,7 @@ e.g.
 
 > $ez = $ezmsqli($db_username,$db_password, $db_name, $host, $port);
 > $user_number_5 = $ez->select('*','users')->where('id','=','5')->get();
+
+### TODO
+
+1. Make all statements prepared

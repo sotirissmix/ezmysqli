@@ -196,7 +196,7 @@ class EzMysqli {
     
     /**
      * Returns results of built query so far in array form
-     * @return array
+     * @return array|null
      */
     public function get() {
         if($this->isAllowed('get')) {
@@ -211,7 +211,7 @@ class EzMysqli {
             if(count($result)>0) {
                 return $result;
             } else {
-                return ['results'=>0];
+                return null;
             }
         }
     }

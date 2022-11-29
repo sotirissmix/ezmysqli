@@ -1,6 +1,10 @@
 # ezmysqli
 
-A very basic PHP MySQLi helper for projects that don't need much
+A very basic PHP MySQLi helper for projects that don't need much/testing/learning.
+Initially made this for a friend to ease his introduction to PHP.
+
+Basically, baby's first MySQLi facade.
+I highly suggest against using this for a production environment. Not only is is not complete, the insert statements are not prepared and pose a security vulnerability.
 
 # Initializing
 
@@ -31,3 +35,5 @@ e.g.
 ### TODO
 
 1. Make all statements prepared
+2. Joins
+3. etc.
